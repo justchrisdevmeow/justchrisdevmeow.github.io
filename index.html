@@ -146,15 +146,68 @@
             margin: 40px 0 20px;
         }
 
-        .social-section {
-            margin-bottom: 20px;
+        /* Music Player */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(26, 26, 36, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 8px 16px 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 109, 90, 0.3);
+            z-index: 1000;
+            font-size: 13px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .social-label {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
+        .music-player button {
+            background: #ff6d5a;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .music-player button:hover {
+            transform: scale(1.05);
+            background: #ff8c7a;
+        }
+
+        .music-player .track-name {
+            color: #ffb347;
+            font-size: 11px;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .volume-slider {
+            width: 60px;
+            height: 3px;
+            -webkit-appearance: none;
+            background: #3a3a48;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            width: 10px;
+            height: 10px;
+            background: #ff6d5a;
+            border-radius: 50%;
+            cursor: pointer;
+            -webkit-appearance: none;
         }
     </style>
 </head>
@@ -162,7 +215,7 @@
     <div class="container">
         <div class="avatar">🐱🎧</div>
         <h1>justchrisdevmeow</h1>
-        <div class="badge">developer · music prod · catboy</div>
+        <div class="badge">developer · music · catboy</div>
         <div class="tagline">building stuff that sounds good & looks cool</div>
 
         <div class="links">
@@ -170,12 +223,12 @@
             <a href="https://github.com/justchrisdevmeow" target="_blank" class="link-btn">🐱 GitHub (alt)</a>
             <a href="https://tiktok.com/@chrisdevsalot" target="_blank" class="link-btn">📱 TikTok</a>
             <a href="https://instagram.com/chrisdevsalot" target="_blank" class="link-btn">📸 Instagram</a>
-            <a href="/app/" class="link-btn">🎛️ NEKOAUDIO DAW</a>
+            <a href="/NekoAudio/" class="link-btn">🎛️ NEKOAUDIO DAW</a>
         </div>
 
         <hr>
 
-        <h3 style="margin-bottom: 20px; font-weight: 500;">⚡ featured side-projects</h3>
+        <h3 style="margin-bottom: 20px; font-weight: 500;">⚡ featured projects</h3>
         <div class="projects">
             <a href="/app/" class="project-card">
                 <div class="project-icon">🎧</div>
@@ -193,5 +246,69 @@
             <span>⚡</span> from the terminal with love <span>⚡</span>
         </div>
     </div>
+
+    <!-- Background Music Player -->
+    <div class="music-player" id="musicPlayer">
+        <span>🎵</span>
+        <span class="track-name">background groove</span>
+        <button id="playPauseBtn">⏸</button>
+        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="30">
+        <span id="volumeIcon">🔉</span>
+    </div>
+
+    <script>
+        const audio = new Audio('assets/bgm.mp3');
+        audio.loop = true;
+        audio.volume = 0.3;
+        
+        let isPlaying = false;
+        
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeIcon = document.getElementById('volumeIcon');
+        
+        // Auto-play attempt (browsers may block)
+        audio.play().then(() => {
+            isPlaying = true;
+            playPauseBtn.textContent = '⏸';
+        }).catch(() => {
+            isPlaying = false;
+            playPauseBtn.textContent = '▶';
+            console.log('Auto-play blocked. Click play to start music.');
+        });
+        
+        playPauseBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                playPauseBtn.textContent = '▶';
+                isPlaying = false;
+            } else {
+                audio.play();
+                playPauseBtn.textContent = '⏸';
+                isPlaying = true;
+            }
+        });
+        
+        volumeSlider.addEventListener('input', (e) => {
+            const val = e.target.value / 100;
+            audio.volume = val;
+            
+            if (val === 0) volumeIcon.textContent = '🔇';
+            else if (val < 0.5) volumeIcon.textContent = '🔉';
+            else volumeIcon.textContent = '🔊';
+        });
+        
+        // Save volume preference
+        volumeSlider.addEventListener('change', () => {
+            localStorage.setItem('bgmVolume', volumeSlider.value);
+        });
+        
+        // Load saved volume
+        const savedVolume = localStorage.getItem('bgmVolume');
+        if (savedVolume) {
+            volumeSlider.value = savedVolume;
+            audio.volume = savedVolume / 100;
+        }
+    </script>
 </body>
 </html>
